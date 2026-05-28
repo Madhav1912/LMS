@@ -1,0 +1,189 @@
+[
+  {
+    "id": "task-1",
+    "title": "Sprint Planning · Course Overview + The Shell · Docker 101 + Assessment",
+    "description": "- Sprint Planning (1 Hour)\n-\r\nCourse Overview + The Shell (3 Hours)\n- Docker 101 + Assessment (3 Hours)\n- Break (1\r\nHour) - includes Lunch & Short Breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-2",
+    "title": "Shell Tools & Scripting + Assessment",
+    "description": "- Shell Tools & Scripting + Assessment\r\n(7 Hours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-3",
+    "title": "Version Control (GIT) + Assessment",
+    "description": "- Version Control (GIT) + Assessment (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-4",
+    "title": "Git immersion + Assessment + Sprint Review",
+    "description": "- Git immersion + Assessment + Sprint Review (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-5",
+    "title": "Git Flight Rules + Assessment",
+    "description": "- Git Flight Rules + Assessment (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-6",
+    "title": "A note about Git Commit Messages + Assessment · Git Tips+ Assessment",
+    "description": "- A note about Git Commit Messages +\r\nAssessment (3 hours)\n- Git Tips+ Assessment (4 Hours)\n- Break (1 Hour) - includes lunch\r\n& short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-7",
+    "title": "Dangit Git + Assessment · Functional Programming",
+    "description": "- Dangit Git + Assessment (2\r\nHours)\n- Functional Programming (5 Hours)\n- Break (1 Hour) - includes lunch & short\r\nbreaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-8",
+    "title": "Sprint Demos + Sprint Review",
+    "description": "- Sprint Demos + Sprint Review (7 Hours by\r\nLearners)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-9",
+    "title": "Database as a Value · Friday Learning Series · Behavioural Training",
+    "description": "- Database as a Value (4\r\nHours)\n- Friday Learning Series (1 Hour)\n- Behavioural Training (2 Hours)\n-\r\nBreak (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-10",
+    "title": "Sprint 2 Planning + Sprint 1 Backlogs · Agile Scrum Basics",
+    "description": "- Sprint 2 Planning + Sprint 1 Backlogs\r\n(1 Hour)\n- Agile Scrum Basics (6 Hours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-11",
+    "title": "Git Merge Strategies · Git Merge Conflicts",
+    "description": "- Git Merge Strategies + Git Merge Conflicts + Assessment (7 Hours)\n- Break 1 Hour (Includes Lunch and Short Breaks)",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-12",
+    "title": "Haskell Chapter 1 -3",
+    "description": "- Haskell Chapter 1 -3 (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-13",
+    "title": "Haskell Chapter 4-6 + Assessment + Sprint Review",
+    "description": "- Haskell Chapter 4-6 + Assessment + Sprint Review (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-14",
+    "title": "Simple Made Easy + Assessment · Friday Learning Series · Behavioral Training",
+    "description": "- Simple Made Easy + Assessment (4\r\nHours)\n- Friday Learning Series (1 Hour)\n- Behavioral Training (2 Hours)\n- Break\r\n(1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-15",
+    "title": "Web Applications 101",
+    "description": "- Web Applications 101 (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-16",
+    "title": "Web Applications 101 + Assessment",
+    "description": "- Web Applications 101 + Assessment (7\r\nHours)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  },
+  {
+    "id": "task-17",
+    "title": "Sprint Demos + Sprint Review",
+    "description": "- Sprint Demos + Sprint Review (7 Hours by\r\nLearners)\n- Break (1 Hour) - includes lunch & short breaks",
+    "status": "todo",
+    "priority": "medium",
+    "timeTracked": 0,
+    "currentSessionStart": null,
+    "startedAt": null,
+    "completedAt": null
+  }
+]
