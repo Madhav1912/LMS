@@ -171,6 +171,7 @@ create table if not exists public.course_enrollments (
   completed_at timestamptz,
   status text not null default 'assigned'
     check (status in ('assigned','in_progress','completed','dropped')),
+  time_spent_ms bigint not null default 0,
   unique (user_id, course_id)
 );
 
@@ -441,13 +442,20 @@ for delete
 to authenticated
 using (public.is_admin());
 
--- COURSES (users see published; admins manage all)
+-- COURSES (users see published, assigned, or admin)
 drop policy if exists "courses_select_published_or_admin" on public.courses;
 create policy "courses_select_published_or_admin"
 on public.courses
 for select
 to authenticated
-using (status = 'published' or public.is_admin());
+using (
+  status = 'published'
+  or public.is_admin()
+  or exists (
+    select 1 from public.course_enrollments ce
+    where ce.course_id = courses.id and ce.user_id = auth.uid()
+  )
+);
 
 drop policy if exists "courses_admin_write" on public.courses;
 create policy "courses_admin_write"
@@ -482,7 +490,14 @@ using (
     select 1
     from public.courses c
     where c.id = course_modules.course_id
-      and (c.status = 'published' or public.is_admin())
+      and (
+        c.status = 'published'
+        or public.is_admin()
+        or exists (
+          select 1 from public.course_enrollments ce
+          where ce.course_id = c.id and ce.user_id = auth.uid()
+        )
+      )
   )
 );
 
@@ -505,7 +520,14 @@ using (
     from public.course_modules cm
     join public.courses c on c.id = cm.course_id
     where cm.id = module_items.module_id
-      and (c.status = 'published' or public.is_admin())
+      and (
+        c.status = 'published'
+        or public.is_admin()
+        or exists (
+          select 1 from public.course_enrollments ce
+          where ce.course_id = c.id and ce.user_id = auth.uid()
+        )
+      )
   )
 );
 
@@ -541,17 +563,15 @@ to authenticated
 using (user_id = auth.uid() or public.is_admin())
 with check (user_id = auth.uid() or public.is_admin());
 
--- optional: allow user self-enrollment only into published courses
-drop policy if exists "course_enrollments_self_enroll_published" on public.course_enrollments;
-create policy "course_enrollments_self_enroll_published"
+drop policy if exists "course_enrollments_admin_delete" on public.course_enrollments;
+create policy "course_enrollments_admin_delete"
 on public.course_enrollments
-for insert
+for delete
 to authenticated
-with check (
-  user_id = auth.uid()
-  and source = 'self'
-  and exists (select 1 from public.courses c where c.id = course_id and c.status = 'published')
-);
+using (public.is_admin());
+
+-- Users may no longer self-enroll; admin assigns courses.
+drop policy if exists "course_enrollments_self_enroll_published" on public.course_enrollments;
 
 -- ITEM PROGRESS (users manage their own; admin read all)
 drop policy if exists "item_progress_select_own_or_admin" on public.item_progress;
@@ -708,4 +728,50 @@ $$;
 
 revoke execute on function public.admin_get_users() from public, anon, authenticated;
 grant execute on function public.admin_get_users() to authenticated;
+
+-- Admin: user course assignments + progress
+create or replace function public.admin_get_user_course_progress(p_user_id uuid)
+returns table (
+  enrollment_id uuid,
+  course_id uuid,
+  course_title text,
+  enrollment_status text,
+  completion_percent numeric,
+  required_items_total int,
+  required_items_completed int,
+  time_spent_ms bigint,
+  started_at timestamptz,
+  completed_at timestamptz,
+  assigned_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    ce.id as enrollment_id,
+    c.id as course_id,
+    c.title as course_title,
+    ce.status as enrollment_status,
+    coalesce(vcp.completion_percent, 0) as completion_percent,
+    coalesce(vcp.required_items_total, 0) as required_items_total,
+    coalesce(vcp.required_items_completed, 0) as required_items_completed,
+    ce.time_spent_ms,
+    ce.started_at,
+    ce.completed_at,
+    ce.assigned_at
+  from public.course_enrollments ce
+  join public.courses c on c.id = ce.course_id
+  left join public.v_course_progress vcp
+    on vcp.user_id = ce.user_id and vcp.course_id = ce.course_id
+  where ce.user_id = p_user_id
+    and public.is_admin()
+  order by ce.assigned_at desc;
+$$;
+
+revoke execute on function public.admin_get_user_course_progress(uuid) from public, anon, authenticated;
+grant execute on function public.admin_get_user_course_progress(uuid) to authenticated;
+
+-- Migration helper (run on existing databases):
+-- alter table public.course_enrollments add column if not exists time_spent_ms bigint not null default 0;
 

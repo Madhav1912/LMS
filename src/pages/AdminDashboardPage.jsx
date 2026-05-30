@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Users, UserCheck, Shield } from 'lucide-react';
 import AdminLayout from '../components/Layout/AdminLayout';
 import UsersTable from '../components/Admin/UsersTable';
+import UserCourseAssignmentsModal from '../components/Admin/UserCourseAssignmentsModal';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
@@ -11,6 +12,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [togglingId, setTogglingId] = useState(null);
+  const [assignmentsUser, setAssignmentsUser] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setError('');
@@ -75,7 +77,7 @@ export default function AdminDashboardPage() {
         <div className="admin-page-header">
           <div>
             <h2>Admin Dashboard</h2>
-            <p className="admin-page-subtitle">Manage users and monitor account activity.</p>
+            <p className="admin-page-subtitle">Manage users, assign courses, and track learning progress.</p>
           </div>
         </div>
 
@@ -126,10 +128,19 @@ export default function AdminDashboardPage() {
             loading={loading}
             currentUserId={user?.id}
             onToggleStatus={handleToggleStatus}
+            onManageCourses={setAssignmentsUser}
             togglingId={togglingId}
           />
         </section>
       </div>
+
+      {assignmentsUser ? (
+        <UserCourseAssignmentsModal
+          user={assignmentsUser}
+          adminId={user?.id}
+          onClose={() => setAssignmentsUser(null)}
+        />
+      ) : null}
     </AdminLayout>
   );
 }

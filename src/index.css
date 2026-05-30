@@ -293,13 +293,35 @@ h1, h2, h3, h4, h5, h6 {
 .task-card {
   background-color: var(--bg-card);
   border-radius: var(--radius-sm);
-  padding: 1rem;
+  padding: 0;
   box-shadow: var(--shadow-sm);
   border: 1px solid var(--border);
-  cursor: grab;
   transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   position: relative;
   overflow: hidden;
+  display: flex;
+}
+
+.task-card-drag-handle {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem 0.35rem;
+  color: var(--text-muted);
+  cursor: grab;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  background: var(--bg-board);
+}
+
+.task-card-drag-handle:active {
+  cursor: grabbing;
+}
+
+.task-card-body {
+  flex: 1;
+  padding: 1rem;
+  min-width: 0;
 }
 
 .task-card::before {
@@ -312,6 +334,7 @@ h1, h2, h3, h4, h5, h6 {
   background-color: var(--primary);
   border-top-left-radius: var(--radius-sm);
   border-bottom-left-radius: var(--radius-sm);
+  z-index: 1;
 }
 
 .task-card:hover {
@@ -320,10 +343,10 @@ h1, h2, h3, h4, h5, h6 {
   border-color: var(--accent);
 }
 
+.task-card-drag-handle.dragging,
 .task-card.dragging {
   opacity: 0.5;
-  transform: scale(0.95);
-  cursor: grabbing;
+  transform: scale(0.98);
 }
 
 .task-header {
@@ -596,6 +619,272 @@ h1, h2, h3, h4, h5, h6 {
 
 .auth-footer a:hover {
   text-decoration: underline;
+}
+
+.dashboard-loading {
+  padding: 3rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.dashboard-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.kanban-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 2rem;
+  padding: 0 1rem;
+  line-height: 1.5;
+}
+
+.course-curriculum-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0.75rem 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-board);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.course-curriculum-toggle:hover {
+  background: var(--bg-column);
+  border-color: var(--accent);
+  color: var(--text-primary);
+}
+
+.course-curriculum {
+  margin: 0 0 0.75rem 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.course-curriculum-module {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-board);
+  overflow: hidden;
+}
+
+.course-curriculum-module-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  background: rgba(59, 130, 246, 0.06);
+  border-bottom: 1px solid var(--border);
+}
+
+.course-curriculum-module-title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.course-curriculum-module-count {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.course-curriculum-module-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  padding: 0.5rem 0.75rem 0;
+  line-height: 1.4;
+}
+
+.course-curriculum-empty {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding: 0.75rem;
+}
+
+.course-curriculum-items {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+}
+
+.course-curriculum-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.course-curriculum-item:last-child {
+  border-bottom: none;
+}
+
+.course-curriculum-item-main {
+  display: flex;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.course-curriculum-item-icon {
+  color: var(--accent);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.course-curriculum-item-info {
+  min-width: 0;
+}
+
+.course-curriculum-item-title {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.2rem;
+}
+
+.course-curriculum-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--text-muted);
+  text-transform: capitalize;
+}
+
+.lesson-status {
+  padding: 1px 6px;
+  border-radius: 999px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.lesson-status-done {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+
+.lesson-status-progress {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--accent);
+}
+
+.lesson-status-todo {
+  background: rgba(100, 116, 139, 0.12);
+  color: var(--text-muted);
+}
+
+.course-curriculum-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.course-curriculum-link,
+.course-curriculum-complete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.course-curriculum-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.course-curriculum-complete-btn:hover:not(:disabled) {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.course-curriculum-complete-btn.done {
+  color: var(--success);
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.08);
+}
+
+.course-curriculum-complete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.admin-modal-wide {
+  max-width: 860px;
+}
+
+.admin-modal-body {
+  padding: 1.5rem;
+}
+
+.admin-modal-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.admin-assign-form {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.25rem;
+}
+
+.admin-assign-form .admin-select {
+  flex: 1;
+  min-width: 220px;
+}
+
+.admin-progress-bar {
+  position: relative;
+  height: 8px;
+  background: var(--bg-column);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.admin-progress-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 999px;
+}
+
+.admin-progress-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.admin-progress-detail {
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 /* App loading */

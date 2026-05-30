@@ -36,7 +36,14 @@ function SkeletonRows() {
   );
 }
 
-export default function UsersTable({ users, loading, currentUserId, onToggleStatus, togglingId }) {
+export default function UsersTable({
+  users,
+  loading,
+  currentUserId,
+  onToggleStatus,
+  onManageCourses,
+  togglingId,
+}) {
   return (
     <div className="users-table-wrapper">
       <table className="users-table">
@@ -63,6 +70,7 @@ export default function UsersTable({ users, loading, currentUserId, onToggleStat
             users.map((user) => {
               const isSelf = user.id === currentUserId;
               const isActive = user.status === 'active';
+              const isUserRole = user.role === 'user';
 
               return (
                 <tr key={user.id}>
@@ -72,22 +80,33 @@ export default function UsersTable({ users, loading, currentUserId, onToggleStat
                   <td><StatusBadge status={user.status} /></td>
                   <td>{formatDate(user.created_at)}</td>
                   <td>
-                    {isSelf ? (
-                      <span className="users-table-self">You</span>
-                    ) : (
-                      <button
-                        type="button"
-                        className={`users-table-action ${isActive ? 'danger' : 'success'}`}
-                        disabled={togglingId === user.id}
-                        onClick={() => onToggleStatus(user)}
-                      >
-                        {togglingId === user.id
-                          ? 'Updating…'
-                          : isActive
-                            ? 'Disable'
-                            : 'Enable'}
-                      </button>
-                    )}
+                    <div className="courses-table-actions">
+                      {isUserRole && isActive ? (
+                        <button
+                          type="button"
+                          className="users-table-action"
+                          onClick={() => onManageCourses(user)}
+                        >
+                          Courses
+                        </button>
+                      ) : null}
+                      {isSelf ? (
+                        <span className="users-table-self">You</span>
+                      ) : (
+                        <button
+                          type="button"
+                          className={`users-table-action ${isActive ? 'danger' : 'success'}`}
+                          disabled={togglingId === user.id}
+                          onClick={() => onToggleStatus(user)}
+                        >
+                          {togglingId === user.id
+                            ? 'Updating…'
+                            : isActive
+                              ? 'Disable'
+                              : 'Enable'}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );
