@@ -18,12 +18,32 @@ export default function LoginPage() {
     setError('');
     setSubmitting(true);
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       if (signInError) throw signInError;
-      navigate(from, { replace: true });
+
+      const userId = data?.user?.id;
+      let destination = from;
+
+      if (userId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role, status')
+          .eq('id', userId)
+          .single();
+
+        if (profile?.role === 'admin' && profile?.status === 'active') {
+          destination = '/admin';
+        } else if (from === '/admin') {
+          destination = '/dashboard';
+        } else if (!from || from === '/login' || from === '/signup') {
+          destination = '/dashboard';
+        }
+      }
+
+      navigate(destination, { replace: true });
     } catch (err) {
       setError(err?.message ?? 'Login failed');
     } finally {

@@ -422,12 +422,24 @@ to authenticated
 using (true);
 
 drop policy if exists "assets_admin_write" on public.assets;
-create policy "assets_admin_write"
+create policy "assets_admin_insert"
 on public.assets
-for all
+for insert
+to authenticated
+with check (public.is_admin());
+
+create policy "assets_admin_update"
+on public.assets
+for update
 to authenticated
 using (public.is_admin())
 with check (public.is_admin());
+
+create policy "assets_admin_delete"
+on public.assets
+for delete
+to authenticated
+using (public.is_admin());
 
 -- COURSES (users see published; admins manage all)
 drop policy if exists "courses_select_published_or_admin" on public.courses;
@@ -669,4 +681,31 @@ on public.issued_certificates
 for insert
 to authenticated
 with check (public.is_admin());
+
+-- -----------------------------------------------------------------------------
+-- Admin RPC: list users with email (joins auth.users)
+-- -----------------------------------------------------------------------------
+
+create or replace function public.admin_get_users()
+returns table (
+  id uuid,
+  full_name text,
+  email text,
+  role text,
+  status text,
+  created_at timestamptz
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select p.id, p.full_name, u.email, p.role, p.status, p.created_at
+  from public.profiles p
+  join auth.users u on u.id = p.id
+  where public.is_admin()
+  order by p.created_at desc;
+$$;
+
+revoke execute on function public.admin_get_users() from public, anon, authenticated;
+grant execute on function public.admin_get_users() to authenticated;
 
