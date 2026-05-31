@@ -3,7 +3,7 @@ import { Sun, Moon } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 
 export default function DashboardLayout({ children }) {
-    const { user, signOut } = useAuth();
+    const { user, profile, signOut } = useAuth();
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem('theme') || 'light';
     });
@@ -39,6 +39,9 @@ export default function DashboardLayout({ children }) {
                 </div>
                 <div className="header-actions">
                     {user?.email ? <span className="header-user">{user.email}</span> : null}
+                    {profile?.designation ? (
+                        <span className="header-designation">{profile.designation}</span>
+                    ) : null}
                     <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle Theme">
                         {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
                     </button>

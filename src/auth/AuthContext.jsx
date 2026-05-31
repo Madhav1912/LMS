@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 async function fetchProfile(userId) {
   const { data, error } = await supabase
     .from('profiles')
-    .select('id, full_name, role, status')
+    .select('id, full_name, role, status, designation')
     .eq('id', userId)
     .single();
 

@@ -26,6 +26,7 @@ create table if not exists public.profiles (
   full_name text,
   role text not null default 'user' check (role in ('admin','user')),
   status text not null default 'active' check (status in ('active','disabled')),
+  designation text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -71,12 +72,13 @@ begin
     target_role := 'user';
   end if;
 
-  insert into public.profiles (id, full_name, role, status)
+  insert into public.profiles (id, full_name, role, status, designation)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', new.email),
     target_role,
-    'active'
+    'active',
+    case when target_role = 'admin' then 'Manager' else null end
   )
   on conflict (id) do nothing;
 
@@ -713,13 +715,14 @@ returns table (
   email text,
   role text,
   status text,
+  designation text,
   created_at timestamptz
 )
 language sql
 security definer
 set search_path = public
 as $$
-  select p.id, p.full_name, u.email, p.role, p.status, p.created_at
+  select p.id, p.full_name, u.email, p.role, p.status, p.designation, p.created_at
   from public.profiles p
   join auth.users u on u.id = p.id
   where public.is_admin()

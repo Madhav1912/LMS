@@ -1125,6 +1125,64 @@ h1, h2, h3, h4, h5, h6 {
   cursor: not-allowed;
 }
 
+.designation-cell {
+  min-width: 180px;
+}
+
+.designation-display-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.designation-text {
+  font-size: 0.875rem;
+  color: var(--text-primary);
+}
+
+.designation-edit-btn {
+  padding: 4px 8px;
+  font-size: 0.75rem;
+}
+
+.designation-edit-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.designation-edit-input {
+  width: 100%;
+  min-width: 140px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+
+.designation-edit-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.designation-edit-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.header-designation {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-column);
+  border: 1px solid var(--border);
+}
+
 .status-badge,
 .role-badge {
   display: inline-block;

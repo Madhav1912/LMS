@@ -38,6 +38,9 @@ export default function AdminLayout({ children }) {
         </div>
         <div className="header-actions">
           {user?.email ? <span className="header-user">{user.email}</span> : null}
+          {profile?.designation ? (
+            <span className="header-designation">{profile.designation}</span>
+          ) : null}
           {profile?.role === 'admin' ? (
             <span className="admin-badge">Admin</span>
           ) : null}

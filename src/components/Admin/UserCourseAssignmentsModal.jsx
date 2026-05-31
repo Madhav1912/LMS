@@ -102,7 +102,10 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
           <div>
             <h3>Course assignments</h3>
             <p className="admin-modal-subtitle">
-              {user.full_name || user.email} · {user.email}
+              {user.full_name || user.email}
+              {user.designation ? ` · ${user.designation}` : ''}
+              {' · '}
+              {user.email}
             </p>
           </div>
           <button type="button" className="admin-modal-close" onClick={onClose} aria-label="Close">

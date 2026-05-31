@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { formatDate } from '../../utils/timeUtils';
 
 function StatusBadge({ status }) {
@@ -19,6 +19,65 @@ function RoleBadge({ role }) {
   );
 }
 
+function DesignationCell({ user, editingId, savingId, onStartEdit, onSave, onCancel }) {
+  const isEditing = editingId === user.id;
+  const isSaving = savingId === user.id;
+  const [value, setValue] = useState(user.designation ?? '');
+
+  useEffect(() => {
+    if (isEditing) {
+      setValue(user.designation ?? '');
+    }
+  }, [isEditing, user.designation]);
+
+  if (isEditing) {
+    return (
+      <div className="designation-edit-cell">
+        <input
+          type="text"
+          className="designation-edit-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="e.g. Developer, Analyst"
+          disabled={isSaving}
+          autoFocus
+        />
+        <div className="designation-edit-actions">
+          <button
+            type="button"
+            className="users-table-action success"
+            disabled={isSaving}
+            onClick={() => onSave(user.id, value)}
+          >
+            {isSaving ? 'Saving…' : 'Save'}
+          </button>
+          <button
+            type="button"
+            className="users-table-action"
+            disabled={isSaving}
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="designation-display-cell">
+      <span className="designation-text">{user.designation || '—'}</span>
+      <button
+        type="button"
+        className="users-table-action designation-edit-btn"
+        onClick={() => onStartEdit(user.id)}
+      >
+        Edit
+      </button>
+    </div>
+  );
+}
+
 function SkeletonRows() {
   return (
     <>
@@ -26,6 +85,7 @@ function SkeletonRows() {
         <tr key={row} className="users-table-skeleton-row">
           <td><div className="skeleton-cell" /></td>
           <td><div className="skeleton-cell" /></td>
+          <td><div className="skeleton-cell short" /></td>
           <td><div className="skeleton-cell short" /></td>
           <td><div className="skeleton-cell short" /></td>
           <td><div className="skeleton-cell short" /></td>
@@ -42,7 +102,12 @@ export default function UsersTable({
   currentUserId,
   onToggleStatus,
   onManageCourses,
+  onUpdateDesignation,
   togglingId,
+  savingDesignationId,
+  editingDesignationId,
+  onStartEditDesignation,
+  onCancelEditDesignation,
 }) {
   return (
     <div className="users-table-wrapper">
@@ -52,6 +117,7 @@ export default function UsersTable({
             <th>Name</th>
             <th>Email</th>
             <th>Role</th>
+            <th>Designation</th>
             <th>Status</th>
             <th>Joined</th>
             <th>Actions</th>
@@ -62,7 +128,7 @@ export default function UsersTable({
             <SkeletonRows />
           ) : users.length === 0 ? (
             <tr>
-              <td colSpan={6} className="users-table-empty">
+              <td colSpan={7} className="users-table-empty">
                 No users found.
               </td>
             </tr>
@@ -77,6 +143,16 @@ export default function UsersTable({
                   <td className="users-table-name">{user.full_name || '—'}</td>
                   <td>{user.email || '—'}</td>
                   <td><RoleBadge role={user.role} /></td>
+                  <td className="designation-cell">
+                    <DesignationCell
+                      user={user}
+                      editingId={editingDesignationId}
+                      savingId={savingDesignationId}
+                      onStartEdit={onStartEditDesignation}
+                      onSave={onUpdateDesignation}
+                      onCancel={onCancelEditDesignation}
+                    />
+                  </td>
                   <td><StatusBadge status={user.status} /></td>
                   <td>{formatDate(user.created_at)}</td>
                   <td>

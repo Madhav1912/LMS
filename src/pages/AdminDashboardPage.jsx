@@ -7,12 +7,14 @@ import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabaseClient';
 
 export default function AdminDashboardPage() {
-  const { user } = useAuth();
+  const { user, refreshProfile } = useAuth();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [togglingId, setTogglingId] = useState(null);
   const [assignmentsUser, setAssignmentsUser] = useState(null);
+  const [editingDesignationId, setEditingDesignationId] = useState(null);
+  const [savingDesignationId, setSavingDesignationId] = useState(null);
 
   const loadUsers = useCallback(async () => {
     setError('');
@@ -68,6 +70,35 @@ export default function AdminDashboardPage() {
       setError(err?.message ?? 'Failed to update user status');
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleUpdateDesignation = async (userId, designationValue) => {
+    const trimmed = designationValue.trim();
+    setSavingDesignationId(userId);
+    setError('');
+
+    try {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ designation: trimmed || null })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, designation: trimmed || null } : u))
+      );
+      setEditingDesignationId(null);
+
+      if (userId === user?.id) {
+        await refreshProfile();
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err?.message ?? 'Failed to update designation');
+    } finally {
+      setSavingDesignationId(null);
     }
   };
 
@@ -129,7 +160,12 @@ export default function AdminDashboardPage() {
             currentUserId={user?.id}
             onToggleStatus={handleToggleStatus}
             onManageCourses={setAssignmentsUser}
+            onUpdateDesignation={handleUpdateDesignation}
             togglingId={togglingId}
+            savingDesignationId={savingDesignationId}
+            editingDesignationId={editingDesignationId}
+            onStartEditDesignation={setEditingDesignationId}
+            onCancelEditDesignation={() => setEditingDesignationId(null)}
           />
         </section>
       </div>
