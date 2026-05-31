@@ -27,6 +27,8 @@ const PUBLISHED_COURSE_SELECT = `
   )
 `;
 
+const ENROLLMENT_SELECT = 'id, course_id, status, started_at, completed_at, time_spent_ms, timer_started_at, assigned_at';
+
 function sortModules(modules = []) {
   return [...modules]
     .sort((a, b) => a.position - b.position)
@@ -101,27 +103,42 @@ export function kanbanToEnrollmentStatus(kanbanStatus) {
   }
 }
 
-export function mapCourseForDashboard(course, enrollment, localProgress = {}, itemProgressById = {}) {
+export function mapEnrollmentFields(enrollment) {
+  if (!enrollment) {
+    return {
+      timeTracked: 0,
+      timerStartedAt: null,
+      startedAt: null,
+      completedAt: null,
+      enrollmentId: null,
+      status: 'todo',
+    };
+  }
+
+  return {
+    timeTracked: enrollment.time_spent_ms ?? 0,
+    timerStartedAt: enrollment.timer_started_at ?? null,
+    startedAt: enrollment.started_at ? new Date(enrollment.started_at).getTime() : null,
+    completedAt: enrollment.completed_at ? new Date(enrollment.completed_at).getTime() : null,
+    enrollmentId: enrollment.id,
+    status: enrollmentToKanbanStatus(enrollment),
+  };
+}
+
+export function mapCourseForDashboard(course, enrollment, itemProgressById = {}) {
   const modules = attachItemProgress(sortModules(course.course_modules), itemProgressById);
   const stats = getCourseLessonStats(modules);
-  const dbTime = enrollment?.time_spent_ms ?? 0;
-  const localTime = localProgress.timeTracked ?? 0;
-  const timeTracked = Math.max(dbTime, localTime);
+  const enrollmentFields = mapEnrollmentFields(enrollment);
 
   return {
     id: course.id,
     title: course.title,
     description: course.description ?? '',
     url: getFirstLessonUrl(modules),
-    status: enrollmentToKanbanStatus(enrollment),
     modules,
     moduleCount: modules.length,
     lessonStats: stats,
-    timeTracked,
-    currentSessionStart: localProgress.currentSessionStart ?? null,
-    startedAt: enrollment?.started_at ? new Date(enrollment.started_at).getTime() : null,
-    completedAt: enrollment?.completed_at ? new Date(enrollment.completed_at).getTime() : null,
-    enrollmentId: enrollment?.id ?? null,
+    ...enrollmentFields,
     source: 'database',
   };
 }
@@ -129,7 +146,7 @@ export function mapCourseForDashboard(course, enrollment, localProgress = {}, it
 export async function fetchAssignedCourses(userId) {
   const { data: enrollments, error: enrollError } = await supabase
     .from('course_enrollments')
-    .select('id, course_id, status, started_at, completed_at, time_spent_ms, assigned_at')
+    .select(ENROLLMENT_SELECT)
     .eq('user_id', userId)
     .neq('status', 'dropped');
 
@@ -150,7 +167,7 @@ export async function fetchAssignedCourses(userId) {
 export async function fetchUserEnrollments(userId) {
   const { data, error } = await supabase
     .from('course_enrollments')
-    .select('id, course_id, status, started_at, completed_at, time_spent_ms')
+    .select(ENROLLMENT_SELECT)
     .eq('user_id', userId)
     .neq('status', 'dropped');
 
@@ -168,40 +185,30 @@ export async function fetchUserItemProgress(userId) {
   return data ?? [];
 }
 
-export async function syncEnrollmentStatus({ userId, courseId, enrollment, kanbanStatus, timeSpentMs }) {
+export async function syncEnrollmentStatus({ enrollment, kanbanStatus }) {
   if (!enrollment?.id) {
     throw new Error('This course has not been assigned to you.');
   }
 
   const dbStatus = kanbanToEnrollmentStatus(kanbanStatus);
-  const now = new Date().toISOString();
 
-  const updates = { status: dbStatus };
-
-  if (typeof timeSpentMs === 'number') {
-    updates.time_spent_ms = timeSpentMs;
-  }
-
-  if (dbStatus === 'in_progress' && !enrollment.started_at) {
-    updates.started_at = now;
-  }
-  if (dbStatus === 'completed') {
-    updates.completed_at = now;
-    if (!enrollment.started_at) updates.started_at = now;
-  }
-  if (dbStatus === 'assigned') {
-    updates.completed_at = null;
-  }
-
-  const { data, error } = await supabase
-    .from('course_enrollments')
-    .update(updates)
-    .eq('id', enrollment.id)
-    .select('id, course_id, status, started_at, completed_at, time_spent_ms')
-    .single();
+  const { data, error } = await supabase.rpc('user_sync_enrollment_status', {
+    p_enrollment_id: enrollment.id,
+    p_status: dbStatus,
+  });
 
   if (error) throw error;
-  return data;
+  return Array.isArray(data) ? data[0] : data;
+}
+
+export async function checkpointEnrollmentTimer(enrollmentId) {
+  const { data, error } = await supabase.rpc('user_checkpoint_enrollment_timer', {
+    p_enrollment_id: enrollmentId,
+  });
+
+  if (error) throw error;
+  if (!data?.length) return null;
+  return data[0];
 }
 
 export async function upsertItemProgress({ userId, moduleItemId, status }) {
@@ -224,4 +231,9 @@ export async function upsertItemProgress({ userId, moduleItemId, status }) {
 
   if (error) throw error;
   return data;
+}
+
+export function applyEnrollmentToCourse(course, enrollment) {
+  const fields = mapEnrollmentFields(enrollment);
+  return { ...course, ...fields };
 }

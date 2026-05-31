@@ -174,6 +174,7 @@ create table if not exists public.course_enrollments (
   status text not null default 'assigned'
     check (status in ('assigned','in_progress','completed','dropped')),
   time_spent_ms bigint not null default 0,
+  timer_started_at timestamptz,
   unique (user_id, course_id)
 );
 
@@ -733,6 +734,151 @@ revoke execute on function public.admin_get_users() from public, anon, authentic
 grant execute on function public.admin_get_users() to authenticated;
 
 -- Admin: user course assignments + progress
+create or replace function public.enrollment_live_time_ms(
+  p_time_spent_ms bigint,
+  p_timer_started_at timestamptz,
+  p_status text
+)
+returns bigint
+language sql
+stable
+as $$
+  select case
+    when p_status = 'in_progress' and p_timer_started_at is not null then
+      coalesce(p_time_spent_ms, 0)
+      + (extract(epoch from (now() - p_timer_started_at)) * 1000)::bigint
+    else coalesce(p_time_spent_ms, 0)
+  end;
+$$;
+
+-- User: pause/resume/complete with server-side timer accounting
+create or replace function public.user_sync_enrollment_status(
+  p_enrollment_id uuid,
+  p_status text
+)
+returns table (
+  id uuid,
+  course_id uuid,
+  status text,
+  started_at timestamptz,
+  completed_at timestamptz,
+  time_spent_ms bigint,
+  timer_started_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+#variable_conflict use_column
+declare
+  e public.course_enrollments%rowtype;
+  elapsed_ms bigint;
+begin
+  if p_status not in ('assigned', 'in_progress', 'completed') then
+    raise exception 'Invalid enrollment status: %', p_status;
+  end if;
+
+  select * into e
+  from public.course_enrollments ce
+  where ce.id = p_enrollment_id and ce.user_id = auth.uid();
+
+  if not found then
+    raise exception 'Enrollment not found';
+  end if;
+
+  if e.status = 'in_progress' and e.timer_started_at is not null
+     and p_status in ('assigned', 'completed') then
+    elapsed_ms := (extract(epoch from (now() - e.timer_started_at)) * 1000)::bigint;
+    e.time_spent_ms := coalesce(e.time_spent_ms, 0) + elapsed_ms;
+    e.timer_started_at := null;
+  end if;
+
+  if p_status = 'in_progress' then
+    if e.timer_started_at is null then
+      e.timer_started_at := now();
+    end if;
+    if e.started_at is null then
+      e.started_at := now();
+    end if;
+  end if;
+
+  e.status := p_status;
+
+  if p_status = 'completed' then
+    e.completed_at := now();
+    if e.started_at is null then
+      e.started_at := now();
+    end if;
+  elsif p_status = 'assigned' then
+    e.completed_at := null;
+  end if;
+
+  update public.course_enrollments ce
+  set
+    status = e.status,
+    time_spent_ms = e.time_spent_ms,
+    timer_started_at = e.timer_started_at,
+    started_at = e.started_at,
+    completed_at = e.completed_at
+  where ce.id = e.id;
+
+  return query
+  select e.id, e.course_id, e.status, e.started_at, e.completed_at, e.time_spent_ms, e.timer_started_at;
+end;
+$$;
+
+revoke execute on function public.user_sync_enrollment_status(uuid, text) from public, anon;
+grant execute on function public.user_sync_enrollment_status(uuid, text) to authenticated;
+
+-- User: checkpoint active timer (persists elapsed time without pausing)
+create or replace function public.user_checkpoint_enrollment_timer(p_enrollment_id uuid)
+returns table (
+  id uuid,
+  course_id uuid,
+  status text,
+  time_spent_ms bigint,
+  timer_started_at timestamptz
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+#variable_conflict use_column
+declare
+  e public.course_enrollments%rowtype;
+  elapsed_ms bigint;
+begin
+  select * into e
+  from public.course_enrollments ce
+  where ce.id = p_enrollment_id
+    and ce.user_id = auth.uid()
+    and ce.status = 'in_progress';
+
+  if not found then
+    return;
+  end if;
+
+  if e.timer_started_at is null then
+    return query select e.id, e.course_id, e.status, e.time_spent_ms, e.timer_started_at;
+    return;
+  end if;
+
+  elapsed_ms := (extract(epoch from (now() - e.timer_started_at)) * 1000)::bigint;
+
+  update public.course_enrollments ce
+  set
+    time_spent_ms = coalesce(ce.time_spent_ms, 0) + elapsed_ms,
+    timer_started_at = now()
+  where ce.id = e.id
+  returning * into e;
+
+  return query select e.id, e.course_id, e.status, e.time_spent_ms, e.timer_started_at;
+end;
+$$;
+
+revoke execute on function public.user_checkpoint_enrollment_timer(uuid) from public, anon;
+grant execute on function public.user_checkpoint_enrollment_timer(uuid) to authenticated;
+
 create or replace function public.admin_get_user_course_progress(p_user_id uuid)
 returns table (
   enrollment_id uuid,
@@ -743,6 +889,8 @@ returns table (
   required_items_total int,
   required_items_completed int,
   time_spent_ms bigint,
+  live_time_spent_ms bigint,
+  timer_started_at timestamptz,
   started_at timestamptz,
   completed_at timestamptz,
   assigned_at timestamptz
@@ -760,6 +908,8 @@ as $$
     coalesce(vcp.required_items_total, 0) as required_items_total,
     coalesce(vcp.required_items_completed, 0) as required_items_completed,
     ce.time_spent_ms,
+    public.enrollment_live_time_ms(ce.time_spent_ms, ce.timer_started_at, ce.status) as live_time_spent_ms,
+    ce.timer_started_at,
     ce.started_at,
     ce.completed_at,
     ce.assigned_at
@@ -777,4 +927,7 @@ grant execute on function public.admin_get_user_course_progress(uuid) to authent
 
 -- Migration helper (run on existing databases):
 -- alter table public.course_enrollments add column if not exists time_spent_ms bigint not null default 0;
+-- alter table public.course_enrollments add column if not exists timer_started_at timestamptz;
+-- Then re-create user_sync_enrollment_status, user_checkpoint_enrollment_timer,
+-- enrollment_live_time_ms, and admin_get_user_course_progress from this file.
 

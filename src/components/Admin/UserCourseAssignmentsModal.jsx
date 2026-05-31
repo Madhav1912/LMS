@@ -7,6 +7,9 @@ import {
   unassignCourse,
 } from '../../lib/adminEnrollmentService';
 import { formatTime } from '../../utils/timeUtils';
+import { computeLiveTimeMs, isTimerRunning } from '../../utils/enrollmentTimer';
+
+const LIVE_POLL_MS = 5000;
 
 function ProgressBar({ percent }) {
   const value = Math.min(100, Math.max(0, Number(percent) || 0));
@@ -14,6 +17,42 @@ function ProgressBar({ percent }) {
     <div className="admin-progress-bar">
       <div className="admin-progress-fill" style={{ width: `${value}%` }} />
       <span className="admin-progress-label">{value}%</span>
+    </div>
+  );
+}
+
+function LiveTimeCell({ row }) {
+  const [displayMs, setDisplayMs] = useState(row.live_time_spent_ms ?? row.time_spent_ms ?? 0);
+  const running = isTimerRunning({
+    status: row.enrollment_status,
+    timerStartedAt: row.timer_started_at,
+  });
+
+  useEffect(() => {
+    const update = () => {
+      setDisplayMs(
+        computeLiveTimeMs({
+          timeSpentMs: row.time_spent_ms,
+          timerStartedAt: row.timer_started_at,
+          status: row.enrollment_status,
+        })
+      );
+    };
+
+    update();
+
+    if (running) {
+      const interval = setInterval(update, 1000);
+      return () => clearInterval(interval);
+    }
+
+    return undefined;
+  }, [row.time_spent_ms, row.timer_started_at, row.enrollment_status, running]);
+
+  return (
+    <div className="admin-live-time-cell">
+      <span>{formatTime(displayMs)}</span>
+      {running ? <span className="live-timer-badge">Live</span> : null}
     </div>
   );
 }
@@ -26,9 +65,11 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
-  const loadData = useCallback(async () => {
+  const loadData = useCallback(async (silent = false) => {
     if (!user?.id) return;
-    setLoading(true);
+    if (!silent) {
+      setLoading(true);
+    }
     setError('');
     try {
       const [progress, courses] = await Promise.all([
@@ -43,13 +84,25 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
       console.error(err);
       setError(err?.message ?? 'Failed to load assignments');
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [user?.id]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    if (!user?.id) return undefined;
+
+    const intervalId = setInterval(() => {
+      loadData(true);
+    }, LIVE_POLL_MS);
+
+    return () => clearInterval(intervalId);
+  }, [user?.id, loadData]);
 
   const handleAssign = async (e) => {
     e.preventDefault();
@@ -174,7 +227,9 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
                           {row.required_items_completed}/{row.required_items_total} lessons
                         </span>
                       </td>
-                      <td>{formatTime(row.time_spent_ms ?? 0)}</td>
+                      <td>
+                        <LiveTimeCell row={row} />
+                      </td>
                       <td>
                         <button
                           type="button"

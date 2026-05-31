@@ -4,6 +4,7 @@ import { BookOpen, Clock, CheckCircle, Activity } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
 import { Pie, Bar } from 'react-chartjs-2';
 import { formatTime } from '../../utils/timeUtils';
+import { computeLiveTimeMs } from '../../utils/enrollmentTimer';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
@@ -19,11 +20,12 @@ export default function DashboardAnalytics() {
 
     // Calculate total hours
     const totalTimeMs = courses.reduce((acc, t) => {
-        let time = t.timeTracked || 0;
-        if (t.status === 'in-progress' && t.currentSessionStart) {
-            time += (Date.now() - t.currentSessionStart);
-        }
-        return acc + time;
+        const dbStatus = t.status === 'in-progress' ? 'in_progress' : t.status === 'done' ? 'completed' : 'assigned';
+        return acc + computeLiveTimeMs({
+            timeSpentMs: t.timeTracked,
+            timerStartedAt: t.timerStartedAt,
+            status: dbStatus,
+        });
     }, 0);
 
     const pieData = {

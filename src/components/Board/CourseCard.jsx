@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, CheckCircle2, GripVertical } from 'lucide-react';
 import { formatTime } from '../../utils/timeUtils';
+import { computeLiveTimeMs, isTimerRunning } from '../../utils/enrollmentTimer';
 import { useCourses } from '../../context/CourseContext';
 import CourseModuleList, { CourseCurriculumToggle } from './CourseModuleList';
 
@@ -11,6 +12,10 @@ export default function CourseCard({ course }) {
   const [busyItemId, setBusyItemId] = useState(null);
 
   const isActive = course.status === 'in-progress';
+  const timerRunning = isTimerRunning({
+    status: isActive ? 'in_progress' : 'assigned',
+    timerStartedAt: course.timerStartedAt,
+  });
   const lessonStats = course.lessonStats ?? {
     totalLessons: 0,
     requiredTotal: 0,
@@ -18,23 +23,25 @@ export default function CourseCard({ course }) {
   };
 
   useEffect(() => {
-    let interval;
     const calculateTime = () => {
-      let total = course.timeTracked || 0;
-      if (isActive && course.currentSessionStart) {
-        total += Date.now() - course.currentSessionStart;
-      }
-      setDisplayTime(total);
+      setDisplayTime(
+        computeLiveTimeMs({
+          timeSpentMs: course.timeTracked,
+          timerStartedAt: course.timerStartedAt,
+          status: isActive ? 'in_progress' : 'assigned',
+        })
+      );
     };
 
     calculateTime();
 
-    if (isActive) {
-      interval = setInterval(calculateTime, 1000);
+    if (timerRunning) {
+      const interval = setInterval(calculateTime, 1000);
+      return () => clearInterval(interval);
     }
 
-    return () => clearInterval(interval);
-  }, [course.timeTracked, course.currentSessionStart, isActive]);
+    return undefined;
+  }, [course.timeTracked, course.timerStartedAt, isActive, timerRunning]);
 
   const handleDragStart = (e) => {
     e.dataTransfer.setData('text/plain', course.id);
