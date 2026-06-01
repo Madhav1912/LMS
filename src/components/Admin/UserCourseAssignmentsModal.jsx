@@ -156,6 +156,7 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
             <h3>Course assignments</h3>
             <p className="admin-modal-subtitle">
               {user.full_name || user.email}
+              {user.department ? ` · ${user.department}` : ''}
               {user.designation ? ` · ${user.designation}` : ''}
               {' · '}
               {user.email}

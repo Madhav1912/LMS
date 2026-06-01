@@ -1,15 +1,13 @@
 import React from 'react';
 import DashboardLayout from '../components/Layout/DashboardLayout';
-import DashboardAnalytics from '../components/Analytics/DashboardAnalytics';
-import KanbanBoard from '../components/Board/KanbanBoard';
 import { CourseProvider } from '../context/CourseContext';
+import UserDashboardContent from './UserDashboardContent';
 
 export default function DashboardPage() {
   return (
     <CourseProvider>
       <DashboardLayout>
-        <DashboardAnalytics />
-        <KanbanBoard />
+        <UserDashboardContent />
       </DashboardLayout>
     </CourseProvider>
   );

@@ -8,8 +8,9 @@ import { computeLiveTimeMs } from '../../utils/enrollmentTimer';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
 
-export default function DashboardAnalytics() {
-    const { courses } = useCourses();
+export default function DashboardAnalytics({ courses: coursesProp }) {
+    const { courses: contextCourses } = useCourses();
+    const courses = coursesProp ?? contextCourses;
 
     const totalModules = courses.length;
     const completedCourses = courses.filter(t => t.status === 'done');

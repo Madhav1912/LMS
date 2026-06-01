@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { formatDate } from '../../utils/timeUtils';
+import HighlightText from '../Common/HighlightText';
 
 function StatusBadge({ status }) {
   const isActive = status === 'active';
@@ -19,16 +20,26 @@ function RoleBadge({ role }) {
   );
 }
 
-function DesignationCell({ user, editingId, savingId, onStartEdit, onSave, onCancel }) {
-  const isEditing = editingId === user.id;
-  const isSaving = savingId === user.id;
-  const [value, setValue] = useState(user.designation ?? '');
+function InlineEditCell({
+  userId,
+  value,
+  editingId,
+  savingId,
+  placeholder,
+  highlightQuery,
+  onStartEdit,
+  onSave,
+  onCancel,
+}) {
+  const isEditing = editingId === userId;
+  const isSaving = savingId === userId;
+  const [draft, setDraft] = useState(value ?? '');
 
   useEffect(() => {
     if (isEditing) {
-      setValue(user.designation ?? '');
+      setDraft(value ?? '');
     }
-  }, [isEditing, user.designation]);
+  }, [isEditing, value]);
 
   if (isEditing) {
     return (
@@ -36,9 +47,9 @@ function DesignationCell({ user, editingId, savingId, onStartEdit, onSave, onCan
         <input
           type="text"
           className="designation-edit-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="e.g. Developer, Analyst"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={placeholder}
           disabled={isSaving}
           autoFocus
         />
@@ -47,7 +58,7 @@ function DesignationCell({ user, editingId, savingId, onStartEdit, onSave, onCan
             type="button"
             className="users-table-action success"
             disabled={isSaving}
-            onClick={() => onSave(user.id, value)}
+            onClick={() => onSave(userId, draft)}
           >
             {isSaving ? 'Saving…' : 'Save'}
           </button>
@@ -66,11 +77,17 @@ function DesignationCell({ user, editingId, savingId, onStartEdit, onSave, onCan
 
   return (
     <div className="designation-display-cell">
-      <span className="designation-text">{user.designation || '—'}</span>
+      <span className="designation-text">
+        {value ? (
+          <HighlightText text={value} query={highlightQuery} />
+        ) : (
+          '—'
+        )}
+      </span>
       <button
         type="button"
         className="users-table-action designation-edit-btn"
-        onClick={() => onStartEdit(user.id)}
+        onClick={() => onStartEdit(userId)}
       >
         Edit
       </button>
@@ -90,6 +107,7 @@ function SkeletonRows() {
           <td><div className="skeleton-cell short" /></td>
           <td><div className="skeleton-cell short" /></td>
           <td><div className="skeleton-cell short" /></td>
+          <td><div className="skeleton-cell short" /></td>
         </tr>
       ))}
     </>
@@ -103,11 +121,18 @@ export default function UsersTable({
   onToggleStatus,
   onManageCourses,
   onUpdateDesignation,
+  onUpdateDepartment,
   togglingId,
   savingDesignationId,
   editingDesignationId,
   onStartEditDesignation,
   onCancelEditDesignation,
+  savingDepartmentId,
+  editingDepartmentId,
+  onStartEditDepartment,
+  onCancelEditDepartment,
+  emptyMessage = 'No users found.',
+  highlightQuery = '',
 }) {
   return (
     <div className="users-table-wrapper">
@@ -118,6 +143,7 @@ export default function UsersTable({
             <th>Email</th>
             <th>Role</th>
             <th>Designation</th>
+            <th>Department</th>
             <th>Status</th>
             <th>Joined</th>
             <th>Actions</th>
@@ -128,8 +154,8 @@ export default function UsersTable({
             <SkeletonRows />
           ) : users.length === 0 ? (
             <tr>
-              <td colSpan={7} className="users-table-empty">
-                No users found.
+              <td colSpan={8} className="users-table-empty">
+                {emptyMessage}
               </td>
             </tr>
           ) : (
@@ -140,17 +166,45 @@ export default function UsersTable({
 
               return (
                 <tr key={user.id}>
-                  <td className="users-table-name">{user.full_name || '—'}</td>
-                  <td>{user.email || '—'}</td>
+                  <td className="users-table-name">
+                    {user.full_name ? (
+                      <HighlightText text={user.full_name} query={highlightQuery} />
+                    ) : (
+                      '—'
+                    )}
+                  </td>
+                  <td>
+                    {user.email ? (
+                      <HighlightText text={user.email} query={highlightQuery} />
+                    ) : (
+                      '—'
+                    )}
+                  </td>
                   <td><RoleBadge role={user.role} /></td>
                   <td className="designation-cell">
-                    <DesignationCell
-                      user={user}
+                    <InlineEditCell
+                      userId={user.id}
+                      value={user.designation}
                       editingId={editingDesignationId}
                       savingId={savingDesignationId}
+                      placeholder="e.g. Developer, Analyst"
+                      highlightQuery={highlightQuery}
                       onStartEdit={onStartEditDesignation}
                       onSave={onUpdateDesignation}
                       onCancel={onCancelEditDesignation}
+                    />
+                  </td>
+                  <td className="designation-cell">
+                    <InlineEditCell
+                      userId={user.id}
+                      value={user.department}
+                      editingId={editingDepartmentId}
+                      savingId={savingDepartmentId}
+                      placeholder="e.g. Engineering, Sales"
+                      highlightQuery={highlightQuery}
+                      onStartEdit={onStartEditDepartment}
+                      onSave={onUpdateDepartment}
+                      onCancel={onCancelEditDepartment}
                     />
                   </td>
                   <td><StatusBadge status={user.status} /></td>

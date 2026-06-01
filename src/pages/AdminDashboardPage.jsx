@@ -3,8 +3,14 @@ import { Users, UserCheck, Shield } from 'lucide-react';
 import AdminLayout from '../components/Layout/AdminLayout';
 import UsersTable from '../components/Admin/UsersTable';
 import UserCourseAssignmentsModal from '../components/Admin/UserCourseAssignmentsModal';
+import SearchFilterBar from '../components/Common/SearchFilterBar';
 import { useAuth } from '../auth/AuthContext';
 import { supabase } from '../lib/supabaseClient';
+import {
+  filterUsersByDepartment,
+  filterUsersBySearch,
+  getUniqueDepartments,
+} from '../utils/listFilters';
 
 export default function AdminDashboardPage() {
   const { user, refreshProfile } = useAuth();
@@ -15,6 +21,10 @@ export default function AdminDashboardPage() {
   const [assignmentsUser, setAssignmentsUser] = useState(null);
   const [editingDesignationId, setEditingDesignationId] = useState(null);
   const [savingDesignationId, setSavingDesignationId] = useState(null);
+  const [editingDepartmentId, setEditingDepartmentId] = useState(null);
+  const [savingDepartmentId, setSavingDepartmentId] = useState(null);
+  const [userSearch, setUserSearch] = useState('');
+  const [departmentFilter, setDepartmentFilter] = useState('');
 
   const loadUsers = useCallback(async () => {
     setError('');
@@ -49,6 +59,26 @@ export default function AdminDashboardPage() {
     return { total, active, admins };
   }, [users]);
 
+  const departmentOptions = useMemo(() => {
+    const departments = getUniqueDepartments(users);
+    const options = [{ value: '', label: 'All departments' }];
+    departments.forEach((dept) => {
+      options.push({ value: dept, label: dept });
+    });
+    if (users.some((u) => !u.department?.trim())) {
+      options.push({ value: '__none__', label: 'No department' });
+    }
+    return options;
+  }, [users]);
+
+  const filteredUsers = useMemo(() => {
+    let result = filterUsersBySearch(users, userSearch);
+    result = filterUsersByDepartment(result, departmentFilter);
+    return result;
+  }, [users, userSearch, departmentFilter]);
+
+  const hasUserFilters = userSearch.trim().length > 0 || departmentFilter.length > 0;
+
   const handleToggleStatus = async (targetUser) => {
     const nextStatus = targetUser.status === 'active' ? 'disabled' : 'active';
     setTogglingId(targetUser.id);
@@ -70,6 +100,31 @@ export default function AdminDashboardPage() {
       setError(err?.message ?? 'Failed to update user status');
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleUpdateDepartment = async (userId, departmentValue) => {
+    const trimmed = departmentValue.trim();
+    setSavingDepartmentId(userId);
+    setError('');
+
+    try {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ department: trimmed || null })
+        .eq('id', userId);
+
+      if (updateError) throw updateError;
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === userId ? { ...u, department: trimmed || null } : u))
+      );
+      setEditingDepartmentId(null);
+    } catch (err) {
+      console.error(err);
+      setError(err?.message ?? 'Failed to update department');
+    } finally {
+      setSavingDepartmentId(null);
     }
   };
 
@@ -154,18 +209,46 @@ export default function AdminDashboardPage() {
 
           {error ? <div className="admin-error">{error}</div> : null}
 
+          <SearchFilterBar
+            searchValue={userSearch}
+            onSearchChange={setUserSearch}
+            searchPlaceholder="Search users by name, email, or department…"
+            showFilter
+            filterLabel="Department"
+            filterValue={departmentFilter}
+            onFilterChange={setDepartmentFilter}
+            filterOptions={departmentOptions}
+          />
+
+          {hasUserFilters && !loading ? (
+            <p className="search-results-meta">
+              Showing {filteredUsers.length} of {users.length} users
+            </p>
+          ) : null}
+
           <UsersTable
-            users={users}
+            users={filteredUsers}
             loading={loading}
             currentUserId={user?.id}
             onToggleStatus={handleToggleStatus}
             onManageCourses={setAssignmentsUser}
             onUpdateDesignation={handleUpdateDesignation}
+            onUpdateDepartment={handleUpdateDepartment}
             togglingId={togglingId}
             savingDesignationId={savingDesignationId}
             editingDesignationId={editingDesignationId}
             onStartEditDesignation={setEditingDesignationId}
             onCancelEditDesignation={() => setEditingDesignationId(null)}
+            savingDepartmentId={savingDepartmentId}
+            editingDepartmentId={editingDepartmentId}
+            onStartEditDepartment={setEditingDepartmentId}
+            onCancelEditDepartment={() => setEditingDepartmentId(null)}
+            emptyMessage={
+              hasUserFilters && users.length > 0
+                ? 'No users match your search or department filter.'
+                : 'No users found.'
+            }
+            highlightQuery={userSearch}
           />
         </section>
       </div>

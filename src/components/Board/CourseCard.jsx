@@ -4,8 +4,9 @@ import { formatTime } from '../../utils/timeUtils';
 import { computeLiveTimeMs, isTimerRunning } from '../../utils/enrollmentTimer';
 import { useCourses } from '../../context/CourseContext';
 import CourseModuleList, { CourseCurriculumToggle } from './CourseModuleList';
+import HighlightText from '../Common/HighlightText';
 
-export default function CourseCard({ course }) {
+export default function CourseCard({ course, highlightQuery = '' }) {
   const { updateCourseStatus, markItemComplete } = useCourses();
   const [displayTime, setDisplayTime] = useState(0);
   const [expanded, setExpanded] = useState(false);
@@ -91,11 +92,15 @@ export default function CourseCard({ course }) {
       <div className="task-card-body">
         <div className="task-header" style={{ alignItems: 'center' }}>
           <h3 className="task-title" style={{ flex: 1, margin: 0 }}>
-            {course.title}
+            <HighlightText text={course.title} query={highlightQuery} />
           </h3>
         </div>
 
-        {course.description ? <p className="task-desc">{course.description}</p> : null}
+        {course.description ? (
+          <p className="task-desc">
+            <HighlightText text={course.description} query={highlightQuery} />
+          </p>
+        ) : null}
 
         {course.moduleCount > 0 ? (
           <>

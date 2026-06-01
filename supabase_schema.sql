@@ -27,6 +27,7 @@ create table if not exists public.profiles (
   role text not null default 'user' check (role in ('admin','user')),
   status text not null default 'active' check (status in ('active','disabled')),
   designation text,
+  department text,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -717,18 +718,22 @@ returns table (
   role text,
   status text,
   designation text,
+  department text,
   created_at timestamptz
 )
 language sql
 security definer
 set search_path = public
 as $$
-  select p.id, p.full_name, u.email, p.role, p.status, p.designation, p.created_at
+  select p.id, p.full_name, u.email, p.role, p.status, p.designation, p.department, p.created_at
   from public.profiles p
   join auth.users u on u.id = p.id
   where public.is_admin()
   order by p.created_at desc;
 $$;
+
+-- Safe to run on existing projects (adds department if missing)
+alter table public.profiles add column if not exists department text;
 
 revoke execute on function public.admin_get_users() from public, anon, authenticated;
 grant execute on function public.admin_get_users() to authenticated;

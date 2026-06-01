@@ -1030,6 +1030,136 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 1.25rem;
 }
 
+/* Search + filter toolbar */
+.search-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1rem;
+}
+
+.search-filter-search {
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  min-height: 42px;
+}
+
+.search-filter-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.search-filter-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-filter-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  outline: none;
+  min-width: 0;
+}
+
+.search-filter-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-filter-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+}
+
+.search-filter-select-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.search-filter-select {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 0.9375rem;
+  cursor: pointer;
+}
+
+.search-filter-select:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.search-results-meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin: -0.25rem 0 1rem;
+}
+
+.search-no-results {
+  border: 1px dashed var(--border);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 1.5rem;
+  font-size: 0.9375rem;
+}
+
+/* User dashboard: Learning Track (course board) */
+.learning-track-section {
+  margin-top: 2rem;
+}
+
+.learning-track-header {
+  margin-bottom: 1rem;
+}
+
+.learning-track-header h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.learning-track-subtitle {
+  color: var(--text-muted);
+  font-size: 0.9375rem;
+}
+
+.learning-track-section .search-filter-bar {
+  margin-bottom: 1.25rem;
+}
+
+mark.search-highlight {
+  background: rgba(245, 158, 11, 0.45);
+  color: inherit;
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 700;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+[data-theme='dark'] mark.search-highlight {
+  background: rgba(251, 191, 36, 0.35);
+  color: var(--text-primary);
+}
+
 .admin-refresh-btn {
   border: 1px solid var(--border);
   background: var(--bg-card);

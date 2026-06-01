@@ -2,8 +2,15 @@ import React from 'react';
 import { useCourses } from '../../context/CourseContext';
 import CourseCard from './CourseCard';
 
-export default function KanbanBoard() {
-  const { courses, loading, error, refreshCourses, moveCourse } = useCourses();
+export default function KanbanBoard({
+  courses: coursesProp,
+  searchActive = false,
+  totalCourses = 0,
+  highlightQuery = '',
+}) {
+  const { courses: contextCourses, loading, error, refreshCourses, moveCourse } = useCourses();
+  const courses = coursesProp ?? contextCourses;
+  const allCoursesCount = totalCourses || contextCourses.length;
 
   const columns = [
     { id: 'todo', title: 'Available Courses' },
@@ -89,13 +96,15 @@ export default function KanbanBoard() {
               <div className="task-list">
                 {colCourses.length === 0 && col.id === 'todo' ? (
                   <div className="kanban-empty">
-                    {courses.length === 0
+                    {allCoursesCount === 0
                       ? 'No courses assigned yet. Your admin will assign courses for you.'
-                      : 'Drag a course here or start one from Available.'}
+                      : searchActive
+                        ? 'No matching courses in this column.'
+                        : 'Drag a course here or start one from Available.'}
                   </div>
                 ) : null}
                 {colCourses.map((course) => (
-                  <CourseCard key={course.id} course={course} />
+                  <CourseCard key={course.id} course={course} highlightQuery={highlightQuery} />
                 ))}
               </div>
             </div>
