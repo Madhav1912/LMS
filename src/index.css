@@ -839,6 +839,175 @@ h1, h2, h3, h4, h5, h6 {
   max-width: 860px;
 }
 
+/* Course assignments modal (width override must follow .admin-modal below) */
+.admin-modal-assignments .admin-modal-body {
+  overflow: visible;
+}
+
+.assignments-table-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+.assignments-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 0.9375rem;
+}
+
+.assignments-col-course {
+  width: 26%;
+}
+
+.assignments-col-status {
+  width: 14%;
+}
+
+.assignments-col-completion {
+  width: 32%;
+}
+
+.assignments-col-time {
+  width: 16%;
+}
+
+.assignments-col-actions {
+  width: 12%;
+}
+
+.assignments-table th,
+.assignments-table td {
+  padding: 1rem 1.125rem;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.assignments-table th {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-board);
+}
+
+.assignments-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.assignments-cell-course {
+  font-weight: 600;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.assignments-cell-status {
+  white-space: nowrap;
+}
+
+.assignments-status-badge {
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.assignments-cell-completion {
+  min-width: 0;
+}
+
+.assignments-cell-time {
+  white-space: nowrap;
+}
+
+.assignments-cell-actions {
+  white-space: nowrap;
+}
+
+.assignment-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.assignment-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.assignment-progress-track {
+  flex: 1;
+  min-width: 0;
+  height: 10px;
+  background: var(--bg-column);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.assignment-progress-fill {
+  height: 100%;
+  background: var(--success);
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.assignment-progress-percent {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.assignment-progress-lessons {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+@media (max-width: 900px) {
+  .admin-modal.admin-modal-assignments {
+    width: 96vw;
+    min-width: 0;
+    max-width: 96vw;
+  }
+
+  .assignments-table {
+    table-layout: auto;
+  }
+
+  .assignments-table-wrapper {
+    overflow-x: auto;
+  }
+
+  .assignments-col-course,
+  .assignments-col-status,
+  .assignments-col-completion,
+  .assignments-col-time,
+  .assignments-col-actions {
+    width: auto;
+  }
+
+  .assignments-table th,
+  .assignments-table td {
+    padding: 0.75rem;
+  }
+
+  .assignments-cell-status,
+  .assignments-cell-time,
+  .assignments-cell-actions {
+    white-space: normal;
+  }
+}
+
 .admin-modal-body {
   padding: 1.5rem;
 }
@@ -1467,6 +1636,12 @@ mark.search-highlight {
   max-width: 520px;
   max-height: 90vh;
   overflow-y: auto;
+}
+
+.admin-modal.admin-modal-assignments {
+  width: min(1280px, 96vw);
+  max-width: min(1280px, 96vw);
+  min-width: min(100%, 720px);
 }
 
 .admin-modal-header {

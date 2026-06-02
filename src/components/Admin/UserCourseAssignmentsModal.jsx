@@ -11,12 +11,19 @@ import { computeLiveTimeMs, isTimerRunning } from '../../utils/enrollmentTimer';
 
 const LIVE_POLL_MS = 5000;
 
-function ProgressBar({ percent }) {
+function AssignmentProgress({ percent, completed, total }) {
   const value = Math.min(100, Math.max(0, Number(percent) || 0));
   return (
-    <div className="admin-progress-bar">
-      <div className="admin-progress-fill" style={{ width: `${value}%` }} />
-      <span className="admin-progress-label">{value}%</span>
+    <div className="assignment-progress">
+      <div className="assignment-progress-row">
+        <div className="assignment-progress-track" aria-hidden>
+          <div className="assignment-progress-fill" style={{ width: `${value}%` }} />
+        </div>
+        <span className="assignment-progress-percent">{value}%</span>
+      </div>
+      <span className="assignment-progress-lessons">
+        {completed}/{total} lessons
+      </span>
     </div>
   );
 }
@@ -146,7 +153,7 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
   return (
     <div className="admin-modal-overlay" onClick={onClose}>
       <div
-        className="admin-modal admin-modal-wide"
+        className="admin-modal admin-modal-assignments"
         role="dialog"
         aria-modal="true"
         onClick={(e) => e.stopPropagation()}
@@ -202,8 +209,15 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
           ) : assignments.length === 0 ? (
             <p className="course-empty-hint">No courses assigned yet.</p>
           ) : (
-            <div className="users-table-wrapper">
-              <table className="users-table">
+            <div className="assignments-table-wrapper">
+              <table className="assignments-table">
+                <colgroup>
+                  <col className="assignments-col-course" />
+                  <col className="assignments-col-status" />
+                  <col className="assignments-col-completion" />
+                  <col className="assignments-col-time" />
+                  <col className="assignments-col-actions" />
+                </colgroup>
                 <thead>
                   <tr>
                     <th>Course</th>
@@ -216,22 +230,31 @@ export default function UserCourseAssignmentsModal({ user, adminId, onClose }) {
                 <tbody>
                   {assignments.map((row) => (
                     <tr key={row.enrollment_id}>
-                      <td className="users-table-name">{row.course_title}</td>
-                      <td>
-                        <span className={`status-badge course-status-${row.enrollment_status === 'completed' ? 'published' : row.enrollment_status === 'in_progress' ? 'draft' : 'archived'}`}>
+                      <td className="assignments-cell-course">{row.course_title}</td>
+                      <td className="assignments-cell-status">
+                        <span
+                          className={`status-badge assignments-status-badge course-status-${
+                            row.enrollment_status === 'completed'
+                              ? 'published'
+                              : row.enrollment_status === 'in_progress'
+                                ? 'draft'
+                                : 'archived'
+                          }`}
+                        >
                           {row.enrollment_status.replace('_', ' ')}
                         </span>
                       </td>
-                      <td>
-                        <ProgressBar percent={row.completion_percent} />
-                        <span className="admin-progress-detail">
-                          {row.required_items_completed}/{row.required_items_total} lessons
-                        </span>
+                      <td className="assignments-cell-completion">
+                        <AssignmentProgress
+                          percent={row.completion_percent}
+                          completed={row.required_items_completed}
+                          total={row.required_items_total}
+                        />
                       </td>
-                      <td>
+                      <td className="assignments-cell-time">
                         <LiveTimeCell row={row} />
                       </td>
-                      <td>
+                      <td className="assignments-cell-actions">
                         <button
                           type="button"
                           className="users-table-action danger"
