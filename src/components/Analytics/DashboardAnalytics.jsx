@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useCourses } from '../../context/CourseContext';
 import { BookOpen, Clock, CheckCircle, Activity } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title } from 'chart.js';
@@ -7,6 +7,10 @@ import { formatTime } from '../../utils/timeUtils';
 import { computeLiveTimeMs } from '../../utils/enrollmentTimer';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement, Title);
+
+function getCssVar(name) {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 
 export default function DashboardAnalytics({ courses: coursesProp }) {
     const { courses: contextCourses } = useCourses();
@@ -44,6 +48,12 @@ export default function DashboardAnalytics({ courses: coursesProp }) {
         ],
     };
 
+    const textSecondary = getCssVar('--text-secondary') || '#475569';
+    const textMuted     = getCssVar('--text-muted')     || '#64748b';
+    const borderColor   = getCssVar('--border')         || '#e2e8f0';
+    const bgCard        = getCssVar('--bg-card')        || '#ffffff';
+    const textPrimary   = getCssVar('--text-primary')   || '#0f172a';
+
     const pieOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -51,9 +61,17 @@ export default function DashboardAnalytics({ courses: coursesProp }) {
             legend: {
                 position: 'bottom',
                 labels: {
-                    color: 'var(--text-secondary)'
+                    color: textSecondary,
+                    padding: 16,
                 }
-            }
+            },
+            tooltip: {
+                backgroundColor: bgCard,
+                titleColor: textPrimary,
+                bodyColor: textSecondary,
+                borderColor: borderColor,
+                borderWidth: 1,
+            },
         }
     };
 
@@ -75,17 +93,26 @@ export default function DashboardAnalytics({ courses: coursesProp }) {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: bgCard,
+                titleColor: textPrimary,
+                bodyColor: textSecondary,
+                borderColor: borderColor,
+                borderWidth: 1,
+            },
         },
         scales: {
             y: {
                 beginAtZero: true,
-                grid: { color: 'rgba(0,0,0,0.05)' },
-                ticks: { color: 'var(--text-secondary)' }
+                grid: { color: borderColor },
+                ticks: { color: textMuted },
+                border: { color: borderColor },
             },
             x: {
                 grid: { display: false },
-                ticks: { color: 'var(--text-secondary)' }
+                ticks: { color: textMuted },
+                border: { color: borderColor },
             }
         }
     };

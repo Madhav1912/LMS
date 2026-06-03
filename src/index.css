@@ -2055,3 +2055,210 @@ mark.search-highlight {
     flex-wrap: wrap;
   }
 }
+
+/* ─── Dark-mode overrides ─────────────────────────────────────────────────── */
+
+/* Native <select> / <option> dropdown readability */
+[data-theme='dark'] select,
+[data-theme='dark'] .search-filter-select,
+[data-theme='dark'] .admin-select {
+  color-scheme: dark;
+}
+[data-theme='dark'] .search-filter-select option,
+[data-theme='dark'] .admin-select option {
+  background-color: #1e293b;
+  color: #f8fafc;
+}
+
+/* Badge / pill backgrounds — raise opacity so they read on dark surfaces */
+[data-theme='dark'] .status-active {
+  background: rgba(16, 185, 129, 0.22);
+}
+[data-theme='dark'] .status-disabled {
+  background: rgba(239, 68, 68, 0.22);
+}
+[data-theme='dark'] .role-admin {
+  background: rgba(139, 92, 246, 0.28);
+}
+[data-theme='dark'] .role-user {
+  background: rgba(59, 130, 246, 0.28);
+}
+[data-theme='dark'] .admin-badge {
+  background: rgba(139, 92, 246, 0.28);
+}
+[data-theme='dark'] .course-status-draft {
+  background: rgba(245, 158, 11, 0.22);
+}
+[data-theme='dark'] .course-status-published {
+  background: rgba(16, 185, 129, 0.22);
+}
+[data-theme='dark'] .course-status-archived {
+  background: rgba(100, 116, 139, 0.28);
+}
+[data-theme='dark'] .lesson-status-done {
+  background: rgba(16, 185, 129, 0.22);
+}
+[data-theme='dark'] .lesson-status-progress {
+  background: rgba(59, 130, 246, 0.22);
+}
+[data-theme='dark'] .lesson-status-todo {
+  background: rgba(100, 116, 139, 0.22);
+}
+
+/* KPI icon tinting — slightly stronger so icons pop */
+[data-theme='dark'] .kpi-icon.blue   { background: rgba(59, 130, 246, 0.22); }
+[data-theme='dark'] .kpi-icon.green  { background: rgba(16, 185, 129, 0.22); }
+[data-theme='dark'] .kpi-icon.amber  { background: rgba(245, 158, 11, 0.22); }
+[data-theme='dark'] .kpi-icon.purple { background: rgba(139, 92, 246, 0.22); }
+
+/* Table row hover — visible on dark surface */
+[data-theme='dark'] .users-table tbody tr:hover td {
+  background: rgba(59, 130, 246, 0.09);
+}
+
+/* Table action buttons — ensure text and border are legible */
+[data-theme='dark'] .users-table-action {
+  background: var(--bg-column);
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .users-table-action.danger {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+}
+[data-theme='dark'] .users-table-action.success {
+  color: #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Course curriculum — module header strip */
+[data-theme='dark'] .course-curriculum-module-header {
+  background: rgba(59, 130, 246, 0.14);
+}
+[data-theme='dark'] .course-curriculum-module-header:hover {
+  background: rgba(59, 130, 246, 0.22);
+}
+[data-theme='dark'] .course-curriculum-item-header:hover {
+  background: rgba(59, 130, 246, 0.09);
+}
+[data-theme='dark'] .course-curriculum-item-detail {
+  background: rgba(59, 130, 246, 0.07);
+}
+
+/* Alert banners — raise contrast */
+[data-theme='dark'] .admin-error,
+[data-theme='dark'] .auth-error {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.55);
+}
+[data-theme='dark'] .admin-success {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.55);
+}
+[data-theme='dark'] .auth-info {
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.55);
+}
+
+/* Task-count pill */
+[data-theme='dark'] .task-count {
+  background: rgba(255, 255, 255, 0.09);
+  color: var(--text-secondary);
+}
+
+/* Kanban column drag-over tint */
+[data-theme='dark'] .kanban-column.drag-over {
+  background-color: rgba(59, 130, 246, 0.09);
+}
+
+/* Auth segment buttons */
+[data-theme='dark'] .auth-seg-btn {
+  background: var(--bg-column);
+}
+[data-theme='dark'] .auth-seg-btn.active {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--accent);
+}
+
+/* Designation / inline-edit pill and input */
+[data-theme='dark'] .header-designation {
+  background: var(--bg-board);
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .designation-edit-input {
+  background: var(--bg-board);
+  border-color: var(--border);
+}
+
+/* Live timer badge */
+[data-theme='dark'] .live-timer-badge {
+  background: rgba(16, 185, 129, 0.28);
+}
+
+/* Admin nav active link — primary-light is very dark, ensure text is bright */
+[data-theme='dark'] .admin-nav-link.active {
+  background: rgba(59, 130, 246, 0.18);
+  color: #93c5fd;
+}
+
+/* Recharts / SVG chart text inherits theme color */
+[data-theme='dark'] .recharts-text,
+[data-theme='dark'] .recharts-cartesian-axis-tick-value,
+[data-theme='dark'] .recharts-legend-item-text {
+  fill: var(--text-secondary) !important;
+  color: var(--text-secondary) !important;
+}
+[data-theme='dark'] .recharts-cartesian-grid line,
+[data-theme='dark'] .recharts-cartesian-axis line,
+[data-theme='dark'] .recharts-cartesian-axis-line {
+  stroke: var(--border) !important;
+}
+[data-theme='dark'] .recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+/* Progress-bar track — more visible on dark */
+[data-theme='dark'] .assignment-progress-track,
+[data-theme='dark'] .admin-progress-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Scrollbar thumb contrast */
+[data-theme='dark'] ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+[data-theme='dark'] ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Course add-module row input field */
+[data-theme='dark'] .course-add-module-row input {
+  background: var(--bg-column);
+  border-color: var(--border);
+}
+
+/* Module card background in course editor */
+[data-theme='dark'] .course-module-card {
+  background: var(--bg-column);
+}
+[data-theme='dark'] .course-module-header {
+  background: var(--bg-card);
+}
+
+/* Course checkbox label text */
+[data-theme='dark'] .course-checkbox-field {
+  color: var(--text-secondary);
+}
+
+/* Curriculum link / complete btn — ensure border is visible */
+[data-theme='dark'] .course-curriculum-link,
+[data-theme='dark'] .course-curriculum-complete-btn {
+  background: var(--bg-column);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+[data-theme='dark'] .course-curriculum-complete-btn.done {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: rgba(16, 185, 129, 0.45);
+}
