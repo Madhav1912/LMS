@@ -6,6 +6,45 @@ import { useCourses } from '../../context/CourseContext';
 import CourseModuleList, { CourseCurriculumToggle } from './CourseModuleList';
 import HighlightText from '../Common/HighlightText';
 
+function CourseProgressBar({ lessonStats, status }) {
+  const { totalLessons, totalCompleted } = lessonStats;
+
+  // Course marked fully done overrides lesson-level counts
+  const isDone = status === 'done';
+  const pct = isDone
+    ? 100
+    : totalLessons > 0
+    ? Math.round((totalCompleted / totalLessons) * 100)
+    : 0;
+
+  // Pick fill colour by progress level
+  let fillClass = 'course-progress-fill';
+  if (isDone || pct === 100) fillClass += ' fill-done';
+  else if (pct >= 50)        fillClass += ' fill-mid';
+  else if (pct > 0)          fillClass += ' fill-low';
+
+  // Don't render the bar at all for courses with no lessons
+  if (totalLessons === 0 && !isDone) return null;
+
+  return (
+    <div className="course-progress-bar-wrap">
+      <div className="course-progress-track">
+        <div
+          className={fillClass}
+          style={{ width: `${pct}%` }}
+          role="progressbar"
+          aria-valuenow={pct}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        />
+      </div>
+      <span className={`course-progress-pct ${isDone ? 'pct-done' : ''}`}>
+        {isDone ? '✓ Done' : `${pct}%`}
+      </span>
+    </div>
+  );
+}
+
 export default function CourseCard({ course, highlightQuery = '' }) {
   const { updateCourseStatus, markItemComplete } = useCourses();
   const [displayTime, setDisplayTime] = useState(0);
@@ -19,6 +58,7 @@ export default function CourseCard({ course, highlightQuery = '' }) {
   });
   const lessonStats = course.lessonStats ?? {
     totalLessons: 0,
+    totalCompleted: 0,
     requiredTotal: 0,
     requiredCompleted: 0,
   };
@@ -101,6 +141,8 @@ export default function CourseCard({ course, highlightQuery = '' }) {
             <HighlightText text={course.description} query={highlightQuery} />
           </p>
         ) : null}
+
+        <CourseProgressBar lessonStats={lessonStats} status={course.status} />
 
         {course.moduleCount > 0 ? (
           <>

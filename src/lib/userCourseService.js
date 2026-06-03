@@ -71,12 +71,13 @@ function attachItemProgress(modules, itemProgressById) {
 }
 
 export function getCourseLessonStats(modules) {
-  const requiredItems = modules.flatMap((m) => m.items.filter((i) => i.isRequired));
-  const completed = requiredItems.filter((i) => i.progressStatus === 'completed').length;
+  const allItems = modules.flatMap((m) => m.items);
+  const requiredItems = allItems.filter((i) => i.isRequired);
   return {
-    totalLessons: modules.reduce((sum, m) => sum + m.items.length, 0),
+    totalLessons: allItems.length,
+    totalCompleted: allItems.filter((i) => i.progressStatus === 'completed').length,
     requiredTotal: requiredItems.length,
-    requiredCompleted: completed,
+    requiredCompleted: requiredItems.filter((i) => i.progressStatus === 'completed').length,
   };
 }
 

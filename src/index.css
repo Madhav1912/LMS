@@ -376,6 +376,60 @@ h1, h2, h3, h4, h5, h6 {
   overflow: hidden;
 }
 
+/* Course progress bar — sits between description and curriculum toggle */
+.course-progress-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0.5rem 0 0.35rem 8px;
+}
+
+.course-progress-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-column);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.course-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease;
+  background: var(--border); /* 0% — neutral */
+}
+
+.course-progress-fill.fill-low {
+  background: var(--accent);
+}
+
+.course-progress-fill.fill-mid {
+  background: #22c55e; /* green-500 */
+}
+
+.course-progress-fill.fill-done {
+  background: var(--success);
+}
+
+.course-progress-pct {
+  flex-shrink: 0;
+  font-size: 0.71rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  min-width: 2.8rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.course-progress-pct.pct-done {
+  color: var(--success);
+}
+
+/* Slightly brighter track in dark mode */
+[data-theme='dark'] .course-progress-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .task-footer {
   display: flex;
   justify-content: space-between;
