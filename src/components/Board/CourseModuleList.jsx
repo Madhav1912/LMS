@@ -22,12 +22,13 @@ function ItemStatusBadge({ status }) {
 function LessonRow({ item, busyItemId, onToggleItemComplete }) {
   const [open, setOpen] = useState(false);
 
-  const completedDone  = item.progressStatus === 'completed';
-  const icon = item.itemType === 'video' ? <Video size={14} /> : <FileText size={14} />;
+  const completedDone = item.progressStatus === 'completed';
+  const icon = item.itemType === 'video' ? <Video size={12} /> : <FileText size={12} />;
+  const duration = formatDuration(item.durationSeconds);
 
   return (
     <li className="course-curriculum-item">
-      {/* clickable header row */}
+      {/* header row — shows all key meta inline */}
       <div
         className="course-curriculum-item-header"
         role="button"
@@ -37,21 +38,24 @@ function LessonRow({ item, busyItemId, onToggleItemComplete }) {
         aria-expanded={open}
       >
         <span className="course-curriculum-item-chevron">
-          {open ? <ChevronDown size={13} /> : <ChevronRight size={13} />}
+          {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </span>
         <span className="course-curriculum-item-icon">{icon}</span>
         <span className="course-curriculum-item-title-inline">{item.title}</span>
+
+        {/* inline meta chips — always visible */}
+        {duration ? (
+          <span className="lesson-meta-chip">{duration}</span>
+        ) : null}
+        {item.isRequired ? (
+          <span className="lesson-meta-chip lesson-meta-required">Req</span>
+        ) : null}
         <ItemStatusBadge status={item.progressStatus} />
       </div>
 
-      {/* collapsible details */}
+      {/* collapsible action panel */}
       {open ? (
         <div className="course-curriculum-item-detail">
-          <div className="course-curriculum-item-meta">
-            <span>{item.itemType === 'video' ? 'Video' : 'PDF'}</span>
-            {item.durationSeconds ? <span>{formatDuration(item.durationSeconds)}</span> : null}
-            <span>{item.isRequired ? 'Required' : 'Optional'}</span>
-          </div>
           <div className="course-curriculum-item-actions">
             {item.url ? (
               <a
@@ -62,7 +66,7 @@ function LessonRow({ item, busyItemId, onToggleItemComplete }) {
                 title="Open lesson"
                 onClick={(e) => e.stopPropagation()}
               >
-                <ExternalLink size={14} />
+                <ExternalLink size={12} />
                 <span>Open</span>
               </a>
             ) : null}
@@ -74,7 +78,7 @@ function LessonRow({ item, busyItemId, onToggleItemComplete }) {
                 onClick={(e) => { e.stopPropagation(); onToggleItemComplete(item.id, 'completed'); }}
                 title="Mark complete"
               >
-                <CheckCircle2 size={14} />
+                <CheckCircle2 size={12} />
                 <span>Mark done</span>
               </button>
             ) : (
@@ -83,10 +87,10 @@ function LessonRow({ item, busyItemId, onToggleItemComplete }) {
                 className="course-curriculum-complete-btn done"
                 disabled={busyItemId === item.id}
                 onClick={(e) => { e.stopPropagation(); onToggleItemComplete(item.id, 'not_started'); }}
-                title="Mark not started"
+                title="Mark undone"
               >
-                <CheckCircle2 size={14} />
-                <span>Mark undone</span>
+                <CheckCircle2 size={12} />
+                <span>Undo</span>
               </button>
             )}
           </div>
@@ -163,16 +167,23 @@ export default function CourseModuleList({ modules, onToggleItemComplete, busyIt
   );
 }
 
-export function CourseCurriculumToggle({ expanded, onToggle, lessonStats }) {
+export function CourseCurriculumToggle({ expanded, onToggle, lessonStats, moduleCount = 0 }) {
+  const { totalLessons, requiredTotal, requiredCompleted } = lessonStats;
+
+  const modulePart = moduleCount > 0
+    ? `${moduleCount} module${moduleCount === 1 ? '' : 's'}`
+    : null;
+  const lessonPart = `${totalLessons} lesson${totalLessons === 1 ? '' : 's'}`;
+  const progressPart = requiredTotal > 0
+    ? `${requiredCompleted}/${requiredTotal} required done`
+    : null;
+
+  const label = [modulePart, lessonPart, progressPart].filter(Boolean).join(' · ');
+
   return (
     <button type="button" className="course-curriculum-toggle" onClick={onToggle}>
-      {expanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-      <span>
-        {lessonStats.totalLessons} lesson{lessonStats.totalLessons === 1 ? '' : 's'}
-        {lessonStats.requiredTotal > 0
-          ? ` · ${lessonStats.requiredCompleted}/${lessonStats.requiredTotal} required done`
-          : ''}
-      </span>
+      {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+      <span className="course-curriculum-toggle-label">{label}</span>
     </button>
   );
 }

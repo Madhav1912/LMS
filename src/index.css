@@ -647,17 +647,18 @@ h1, h2, h3, h4, h5, h6 {
 .course-curriculum-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  margin: 0.5rem 0 0.75rem 8px;
-  padding: 6px 10px;
+  gap: 0.3rem;
+  margin: 0.4rem 0 0.5rem 8px;
+  padding: 5px 9px;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-board);
   color: var(--text-secondary);
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s, border-color 0.2s;
+  max-width: calc(100% - 8px);
 }
 
 .course-curriculum-toggle:hover {
@@ -666,35 +667,69 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-primary);
 }
 
-.course-curriculum {
-  margin: 0 0 0.75rem 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
+.course-curriculum-toggle-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.course-curriculum-module {
+.course-curriculum {
+  /* scrollable curriculum panel — stays inside the card */
+  margin: 0 0 0.75rem 8px;
+  max-height: 280px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   background: var(--bg-board);
+
+  /* thin custom scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.course-curriculum::-webkit-scrollbar {
+  width: 4px;
+}
+.course-curriculum::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.course-curriculum-module {
+  /* modules sit as rows inside the scroll panel */
+  border: none;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
   overflow: hidden;
+  flex-shrink: 0;
+}
+
+.course-curriculum-module:last-child {
+  border-bottom: none;
 }
 
 .course-curriculum-module-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 0.5rem;
-  padding: 0.625rem 0.75rem;
+  /* tighter padding for compact rows */
+  padding: 0.45rem 0.65rem;
   background: rgba(59, 130, 246, 0.06);
-  border-bottom: 1px solid var(--border);
-  /* now a <button> */
   width: 100%;
   border: none;
   border-bottom: 1px solid var(--border);
   cursor: pointer;
   text-align: left;
   transition: background-color 0.15s;
+}
+
+/* hide the bottom border when module is closed (last child handled above) */
+.course-curriculum-module-header[aria-expanded='false'] {
+  border-bottom: none;
 }
 
 .course-curriculum-module-header:hover {
@@ -708,21 +743,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .course-curriculum-module-title {
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-primary);
-}
-
-.course-curriculum-module-count {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.course-curriculum-module-count {
+  font-size: 0.71rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .course-curriculum-module-desc {
-  font-size: 0.75rem;
+  font-size: 0.71rem;
   color: var(--text-secondary);
-  padding: 0.5rem 0.75rem 0;
+  padding: 0.35rem 0.65rem 0;
   line-height: 1.4;
 }
 
@@ -750,8 +790,8 @@ h1, h2, h3, h4, h5, h6 {
 .course-curriculum-item-header {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
   cursor: pointer;
   transition: background-color 0.15s;
   user-select: none;
@@ -775,7 +815,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .course-curriculum-item-title-inline {
   flex: 1;
-  font-size: 0.8125rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-primary);
   min-width: 0;
@@ -790,8 +830,8 @@ h1, h2, h3, h4, h5, h6 {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  padding: 0.4rem 0.75rem 0.6rem 2.5rem;
+  gap: 0.4rem;
+  padding: 0.3rem 0.65rem 0.45rem 2.1rem;
   background: rgba(59, 130, 246, 0.03);
   border-top: 1px solid var(--border);
 }
@@ -825,11 +865,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .lesson-status {
-  padding: 1px 6px;
+  flex-shrink: 0;
+  padding: 1px 5px;
   border-radius: 999px;
+  font-size: 0.67rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  white-space: nowrap;
 }
 
 .lesson-status-done {
@@ -847,10 +890,23 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--text-muted);
 }
 
+/* inline meta chips shown in the lesson header row */
+.lesson-meta-chip {
+  flex-shrink: 0;
+  font-size: 0.67rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.lesson-meta-required {
+  color: var(--accent);
+}
+
 .course-curriculum-item-actions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-shrink: 0;
 }
 
@@ -858,14 +914,14 @@ h1, h2, h3, h4, h5, h6 {
 .course-curriculum-complete-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
+  gap: 4px;
+  padding: 3px 8px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--border);
   background: var(--bg-card);
   color: var(--text-secondary);
   cursor: pointer;
-  font-size: 0.75rem;
+  font-size: 0.71rem;
   font-weight: 600;
   text-decoration: none;
   transition: background-color 0.2s, border-color 0.2s, color 0.2s;
@@ -2128,6 +2184,15 @@ mark.search-highlight {
 [data-theme='dark'] .users-table-action.success {
   color: #34d399;
   border-color: rgba(52, 211, 153, 0.4);
+}
+
+/* Course curriculum scroll panel */
+[data-theme='dark'] .course-curriculum {
+  background: var(--bg-board);
+  scrollbar-color: var(--border) transparent;
+}
+[data-theme='dark'] .course-curriculum::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 
 /* Course curriculum — module header strip */

@@ -108,6 +108,7 @@ export default function CourseCard({ course, highlightQuery = '' }) {
               expanded={expanded}
               onToggle={() => setExpanded((prev) => !prev)}
               lessonStats={lessonStats}
+              moduleCount={course.moduleCount}
             />
             {expanded ? (
               <CourseModuleList
